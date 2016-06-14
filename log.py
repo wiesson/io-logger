@@ -2,6 +2,7 @@ from http.server import HTTPServer, BaseHTTPRequestHandler
 
 import sys
 import urllib.request
+import urllib.error
 import json
 
 response = None
@@ -40,7 +41,12 @@ def get_ngrok_url():
 
 
 if __name__ == '__main__':
-    url = get_ngrok_url()
+    try:
+        url = get_ngrok_url()
+
+    except urllib.error.URLError:
+        sys.exit("Ngrok not found")
+
     response = '<?xml version="1.0" encoding="UTF-8"?><Response onAnswer="{}" onHangup="{}" />'.format(
         url, url)
 
