@@ -1,14 +1,13 @@
 from http.server import HTTPServer, BaseHTTPRequestHandler
 
 import sys
+import urllib.request
+import json
 
-url = "https://57f3f52c.eu.ngrok.io"
-response = '<?xml version="1.0" encoding="UTF-8"?><Response onAnswer="{}" onHangup="{}" />'.format(url, url)
+response = None
 
 
 class StoreHandler(BaseHTTPRequestHandler):
-    log = ""
-
     def do_GET(self):
         self.return_http_200()
 
@@ -32,6 +31,18 @@ class StoreHandler(BaseHTTPRequestHandler):
         self.end_headers()
 
 
+def get_ngrok_url():
+    with urllib.request.urlopen('http://localhost:4040/api/tunnels') as response:
+        tunnels = json.loads(response.read().decode("utf-8"))
+
+        # tunnels.get("tunnels")[0].get("public_url")
+        return tunnels.get("tunnels")[1].get("public_url")
+
+
 if __name__ == '__main__':
+    url = get_ngrok_url()
+    response = '<?xml version="1.0" encoding="UTF-8"?><Response onAnswer="{}" onHangup="{}" />'.format(
+        url, url)
+
     server = HTTPServer(('', 5000), StoreHandler)
     server.serve_forever()
